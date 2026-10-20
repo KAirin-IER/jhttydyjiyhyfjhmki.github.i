@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cheesecake Tasks ♡</title>
+<style>
+:root{--p:#d85f91;--bg:#fff7f2;--card:#fff;--soft:#f9dfeb;--ink:#704254;--line:#f0d4e0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px system-ui,sans-serif}
+button,input,select{font:inherit}
+button{border:0;border-radius:13px;padding:11px;background:var(--soft);color:var(--ink);cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--p)}
+header,main{max-width:680px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center}
+h1{font-size:21px;margin:0}h2{font-size:21px}h3{margin:0 0 12px}
+p{color:#a47789;font-size:14px}
+.hero,.card{padding:18px;border-radius:22px;margin-bottom:14px}
+.hero{background:linear-gradient(135deg,#f9dfeb,#fff0e4);display:flex;align-items:center;gap:10px}
+.hero>div:first-child{flex:1}
+.mascot{font-size:68px}
+.card{background:var(--card);border:1px solid var(--line)}
+input,select{padding:12px;border:1px solid var(--line);border-radius:12px;background:white;color:var(--ink);min-width:0}
+#newTask{flex:1;width:100%}
+form,.row{display:flex;gap:8px;flex-wrap:wrap}
+form button,.row button{flex:1}
+.primary{background:var(--p);color:white}
+.filters{display:flex;gap:6px;overflow-x:auto;margin:14px 0}
+.filters button{white-space:nowrap;padding:8px 12px}
+.filters .active,.nav .active{background:var(--p);color:white}
+.task{display:flex;align-items:center;gap:9px;padding:12px 0;border-bottom:1px solid var(--line)}
+.task input{width:20px;height:20px;accent-color:var(--p)}
+.task span{flex:1;overflow-wrap:anywhere}
+.done span{text-decoration:line-through;opacity:.6}
+.small{padding:7px 10px}
+.progress{height:9px;background:white;border-radius:10px;overflow:hidden}
+#bar{height:100%;width:0;background:var(--p);transition:width .2s}
+#cake{font-size:34px;text-align:center;min-height:90px;padding:20px;background:#fff5fa;border-radius:16px;margin:12px 0;overflow-wrap:anywhere}
+#clock{text-align:center;font-size:42px;margin:15px}
+.nav{position:sticky;bottom:0;background:var(--bg);display:flex;justify-content:center;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.nav button{flex:1;max-width:180px;background:transparent}
+[hidden]{display:none!important}
+@media(min-width:520px){main,header{padding:20px}.hero{padding:24px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+ <div><h1>🍰 Cheesecake Tasks ♡</h1><p>Little things, one slice at a time.</p></div>
+ <button id="themeToggle" aria-label="Change theme">☾</button>
+</header>
+<main>
+<section class="hero">
+ <div>
+  <h2 id="greeting">Let's make today sweet! ✿</h2>
+  <p id="progressText">Every little step counts.</p>
+  <div class="progress"><div id="bar"></div></div>
+ </div>
+ <div class="mascot" aria-label="Cute cheesecake">🍰</div>
+</section>
+
+<section id="home">
+ <div class="card">
+  <h3>♡ Today's little plan</h3>
+  <form id="taskForm">
+   <input id="newTask" maxlength="120" placeholder="Add a little task..." required>
+   <button class="primary">+ Add</button>
+  </form>
+  <p>One thing at a time. You've got this!</p>
+  <div class="filters" id="filters">
+   <button class="active" data-filter="All">All</button>
+   <button data-filter="To do">To do</button>
+   <button data-filter="Done">Done</button>
+   <button data-filter="Study">Study</button>
+   <button data-filter="Work">Work</button>
+   <button data-filter="Personal">Personal</button>
+   <button data-filter="Self-care">Self-care</button>
+  </div>
+  <div id="tasks"></div>
+  <button id="clear" class="small">Clear finished</button>
+  <button id="undo" class="small" hidden>Undo clear</button>
+ </div>
+</section>
+
+<section id="cakePage" hidden>
+ <div class="card">
+  <h3>🎀 My little cake</h3>
+  <p>Complete tasks to earn decorations!</p>
+  <div id="cake">🍰</div>
+  <p id="points">0 sprinkles earned</p>
+  <div class="row">
+   <button data-sticker="🍓">🍓</button>
+   <button data-sticker="🍒">🍒</button>
+   <button data-sticker="💗">💗</button>
+   <button data-sticker="✨">✨</button>
+  </div>
+ </div>
+ <div class="card">
+  <h3>Choose your theme</h3>
+  <div class="row">
+   <button data-theme="pink">🍓 Pink</button>
+   <button data-theme="cream">🍮 Cream</button>
+   <button data-theme="lavender">🪻 Lavender</button>
+  </div>
+  <p>Some themes unlock as you complete tasks.</p>
+ </div>
+</section>
+
+<section id="historyPage" hidden>
+ <div class="card">
+  <h3>♡ My Slices</h3>
+  <label for="day">Choose a date</label>
+  <input id="day" type="date">
+  <div id="history"></div>
+ </div>
+ <div class="card">
+  <h3>How are you feeling?</h3>
+  <div class="row" id="moods">
+   <button data-mood="Sunny">☀️ Sunny</button>
+   <button data-mood="Calm">🌷 Calm</button>
+   <button data-mood="Tired">☁️ Tired</button>
+   <button data-mood="Low">🌧️ Low</button>
+   <button data-mood="Mixed">🌈 Mixed</button>
+  </div>
+  <p id="moodText">Optional — choose a mood or skip.</p>
+ </div>
+</section>
+
+<section class="card">
+ <h3>⏳ Cozy focus timer</h3>
+ <select id="duration" aria-label="Focus duration">
+  <option value="15">15 minutes</option>
+  <option value="25" selected>25 minutes</option>
+  <option value="45">45 minutes</option>
+ </select>
+ <div id="clock">25:00</div>
+ <div class="row">
+  <button class="primary" id="start">Start focus</button>
+  <button id="break">5-min break</button>
+ </div>
+ <p id="timerText">Focus gently. Take breaks when you need them.</p>
+</section>
+
+<section class="card">
+ <h3>🔔 Gentle reminders</h3>
+ <label><input type="checkbox" id="reminders"> Remind me every hour while this page is open</label>
+ <p id="reminderText">You can turn reminders off anytime.</p>
+ <button id="notify">Enable timer notifications</button>
+</section>
+</main>
+
+<nav class="nav" aria-label="Main navigation">
+ <button class="active" data-page="home">⌂ Home</button>
+ <button data-page="cakePage">🍰 My Cake</button>
+ <button data-page="historyPage">♡ My Slices</button>
+</nav>
+
+<script>
+const $=s=>document.querySelector(s);
+const all=s=>[...document.querySelectorAll(s)];
+const KEY='cheesecake-v1';
+const PREF='cheesecake-pref-v1';
+const date=()=>new Date().toLocaleDateString('en-CA');
+let data={tasks:[],decor:[],moods:{}},prefs={theme:'pink'};
+let filter='All',undo=null,end=0,mode='focus',tick=null,reminder=null;
+try{data={...data,...JSON.parse(localStorage.getItem(KEY)||'{}')};
+prefs={...prefs,...JSON.parse(localStorage.getItem(PREF)||'{}')}}catch(e){}
+if(!Array.isArray(data.tasks))data.tasks=[];
+if(!Array.isArray(data.decor))data.decor=[];
+function save(){
+ try{localStorage.setItem(KEY,JSON.stringify(data));
+ localStorage.setItem(PREF,JSON.stringify(prefs))}
+ catch(e){$('#reminderText').textContent='Unable to save in this browser.'}
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ let list=data.tasks.filter(t=>filter==='All'||filter==='To do'&&!t.done||filter==='Done'&&t.done||t.category===filter);
+ $('#tasks').innerHTML=list.length?list.map(t=>`<div class="task ${t.done?'done':''}">
+ <input type="checkbox" data-check="${t.id}" ${t.done?'checked':''} aria-label="Complete task">
+ <span>${esc(t.title)}<small><br>${esc(t.category)}${t.due?' · '+esc(t.due):''}</small></span>
+ <button class="small" data-edit="${t.id}" aria-label="Edit task">✎</button>
+ <button class="small" data-delete="${t.id}" aria-label="Delete task">×</button></div>`).join(''):'<p style="text-align:center">A fresh little start 🌷</p>';
+ let done=data.tasks.filter(t=>t.done).length;
+ $('#progressText').textContent=`${done} of ${data.tasks.length} tasks completed ♡`;
+ $('#bar').style.width=(data.tasks.length?done/data.tasks.length*100:0)+'%';
+ $('#undo').hidden=!undo;renderCake();renderHistory();save();
+}
+function renderCake(){
+ $('#cake').textContent='🍰 '+data.decor.join(' ');
+ $('#points').textContent=`${data.decor.length} sprinkles earned ♡`;
+}
+function renderHistory(){
+ if(!$('#day').value)$('#day').value=date();
+ let d=$('#day').value;
+ let list=data.tasks.filter(t=>(t.doneAt||t.createdAt||'').slice(0,10)===d);
+ $('#history').innerHTML=list.length?list.map(t=>`<div class="task">${t.done?'✓':'○'} <span>${esc(t.title)}<small>${t.done?'Completed':'Not completed'}</small></span></div>`).join(''):'<p>No tasks recorded for this day yet ♡</p>';
+ $('#moodText').textContent=data.moods[d]?'Your mood: '+data.moods[d]:'Optional — choose a mood or skip.';
+}
+$('#taskForm').onsubmit=e=>{
+ e.preventDefault();let title=$('#newTask').value.trim();if(!title)return;
+ let category=prompt('Category: Study, Work, Personal, or Self-care','Personal');
+ if(category===null)category='Personal';
+ if(!['Study','Work','Personal','Self-care'].includes(category))category='Personal';
+ let due=prompt('Due date (optional, YYYY-MM-DD)','')||'';
+ data.tasks.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),title,category,due:/^\d{4}-\d{2}-\d{2}$/.test(due)?due:'',done:false,createdAt:new Date().toISOString()});
+ $('#newTask').value='';filter='All';all('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter==='All'));render();
+};
+$('#tasks').onchange=e=>{
+ let t=data.tasks.find(x=>x.id===e.target.dataset.check);if(!t)return;
+ t.done=e.target.checked;t.doneAt=t.done?new Date().toISOString():'';
+ if(t.done)data.decor.push(['🍓','✨','💗','🍒'][data.decor.length%4]);render();
+};
+$('#tasks').onclick=e=>{
+ let id=e.target.dataset.delete;
+ if(id){data.tasks=data.tasks.filter(t=>t.id!==id);render();return}
+ id=e.target.dataset.edit;
+ if(id){let t=data.tasks.find(x=>x.id===id),v=prompt('Edit task',t.title);
+ if(v&&v.trim())t.title=v.trim();render()}
+};
+$('#filters').onclick=e=>{
+ let b=e.target.closest('[data-filter]');if(!b)return;
+ filter=b.dataset.filter;all('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));render();
+};
+$('#clear').onclick=()=>{
+ undo=data.tasks.filter(t=>t.done);if(!undo.length)return;
+ data.tasks=data.tasks.filter(t=>!t.done);render();
+};
+$('#undo').onclick=()=>{if(undo){data.tasks=[...undo,...data.tasks];undo=null;render()}};
+all('[data-page]').forEach(b=>b.onclick=()=>{
+ all('[data-page]').forEach(x=>x.classList.toggle('active',x===b));
+ ['home','cakePage','historyPage'].forEach(id=>$('#'+id).hidden=id!==b.dataset.page);
+ if(b.dataset.page==='historyPage')renderHistory();window.scrollTo(0,0);
+});
+all('[data-sticker]').forEach(b=>b.onclick=()=>{
+ if(data.tasks.filter(t=>t.done).length<3){alert('Complete 3 tasks to unlock decorations ♡');return}
+ data.decor.push(b.dataset.sticker);render();
+});
+function theme(t){
+ if((t==='cream'&&data.decor.length<3)||(t==='lavender'&&data.decor.length<6)){
+ alert('Complete more tasks to unlock this theme ♡');return}
+ let v={pink:['#d85f91','#fff7f2','#f9dfeb','#704254','#f0d4e0'],
+ cream:['#b78255','#fffaf1','#f2e2cf','#65462f','#ead8c5'],
+ lavender:['#917bc4','#fbf8ff','#e9e1fb','#51436e','#e4daf5']}[t];
+ ['--p','--bg','--soft','--ink','--line'].forEach((k,i)=>document.documentElement.style.setProperty(k,v[i]));
+ prefs.theme=t;save();
+}
+all('[data-theme]').forEach(b=>b.onclick=()=>theme(b.dataset.theme));
+$('#themeToggle').onclick=()=>theme(prefs.theme==='pink'?'cream':prefs.theme==='cream'?'lavender':'pink');
+$('#day').value=date();$('#day').onchange=renderHistory;
+$('#moods').onclick=e=>{
+ let b=e.target.closest('[data-mood]');if(!b)return;
+ data.moods[$('#day').value||date()]=b.dataset.mood;renderHistory();save();
+};
+function showClock(){
+ let n=Math.max(0,Math.ceil((end-Date.now())/1000));
+ $('#clock').textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+ if(!n&&end){clearInterval(tick);end=0;$('#start').textContent='Start focus';
+ $('#timerText').textContent=mode==='focus'?'Lovely work! Take a little break ♡':'Break finished. Welcome back ♡';
+ if('Notification'in window&&Notification.permission==='granted')new Notification('Cheesecake Tasks',{body:$('#timerText').textContent});}
+}
+function startTimer(min,m){
+ clearInterval(tick);mode=m;end=Date.now()+min*60000;$('#start').textContent='Stop timer';
+ $('#timerText').textContent=m==='focus'?'You are doing great. One thing at a time.':'Relax your eyes and stretch if you like.';
+ tick=setInterval(showClock,250);showClock();
+}
+$('#start').onclick=()=>{
+ if(end){end=0;clearInterval(tick);$('#start').textContent='Start focus';$('#timerText').textContent='Paused. Restart whenever you like.';return}
+ startTimer(Number($('#duration').value),'focus');
+};
+$('#break').onclick=()=>startTimer(5,'break');
+$('#reminders').onchange=e=>{
+ clearInterval(reminder);
+ if(e.target.checked)reminder=setInterval(()=>{
+ if(!document.hidden)$('#reminderText').textContent='Little reminder: stretch, sip water, or rest your eyes ♡';
+ },3600000);
+ else $('#reminderText').textContent='Reminders are off.';
+};
+$('#notify').onclick=async()=>{
+ if(!('Notification'in window)){alert('Notifications are not supported in this browser.');return}
+ try{let p=await Notification.requestPermission();
+ $('#reminderText').textContent=p==='granted'?'Timer notifications enabled ♡':'Notifications are off.'}
+ catch(e){$('#reminderText').textContent='Could not enable notifications.'}
+};
+$('#greeting').textContent=new Date().getHours()<12?'Good morning, little star! ♡':new Date().getHours()<18?'Let’s make today sweet! ♡':'A cozy little evening ♡';
+theme(prefs.theme);render();
+</script>
+</body>
+</html>
